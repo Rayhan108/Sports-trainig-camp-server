@@ -63,7 +63,40 @@ app.patch("/admin/:id", async (req, res) => {
   res.send(result);
 });
 
+// make instructor
 
+app.patch("/instructor/:id",async(req,res)=>{
+  const id = req.params.id;
+  const filter={_id: new ObjectId(id)};
+  const updatedoc={
+    $set:{
+      role:"instructor",
+    }
+  };
+  const result = await usersCollection.updateOne(filter,updatedoc);
+  res.send(result)
+})
+
+// get admin
+
+
+app.get('/admin/:email',async (req, res) => {
+  const email = req.params.email;
+  const query = { email: email }
+  const user = await usersCollection.findOne(query);
+  const result = { admin: user?.role === 'admin' }
+  res.send(result);
+})
+
+// get instractor
+
+app.get('/users/instractor/:email',async(req,res)=>{
+  const email =req.params.email;
+  const query={email:email}
+  const user = await usersCollection.findOne(query);
+  const result={instructor:user?.role === 'instructor'};
+  res.send(result);
+})
 
 
 
