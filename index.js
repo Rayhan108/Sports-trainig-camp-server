@@ -49,6 +49,24 @@ app.post("/users", async (req, res) => {
         res.send(result);
       });
   
+
+// make admin
+app.patch("/admin/:id", async (req, res) => {
+  const id = req.params.id;
+  const filter = { _id: new ObjectId(id) };
+  const updateDoc = {
+    $set: {
+      role: "admin",
+    },
+  };
+  const result = await usersCollection.updateOne(filter, updateDoc);
+  res.send(result);
+});
+
+
+
+
+
     // Send a ping to confirm a successful connection
     await client.db('admin').command({ ping: 1 })
     console.log(
