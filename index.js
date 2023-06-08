@@ -31,18 +31,23 @@ async function run() {
 
 
 // save all user email on db
-    app.put('/users/:email', async (req, res) => {
-        const email = req.params.email
-        const user = req.body
-        const query = { email: email }
-        const options = { upsert: true }
-        const updateDoc = {
-          $set: user,
-        }
-        const result = await usersCollection.updateOne(query, updateDoc, options)
-        // console.log(result)
-        res.send(result)
-      })
+app.post("/users", async (req, res) => {
+  const user = req.body;
+  // console.log(user);
+  const query = { email: user.email };
+  const previousUser = await usersCollection.findOne(query);
+  if (previousUser) {
+    return res.send({ message: "user already exist" });
+  }
+  const result = await usersCollection.insertOne(user);
+  res.send(result);
+});
+
+      // get users
+      app.get("/allUsers", async (req, res) => {
+        const result = await usersCollection.find().toArray();
+        res.send(result);
+      });
   
     // Send a ping to confirm a successful connection
     await client.db('admin').command({ ping: 1 })
