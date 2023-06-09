@@ -27,6 +27,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     const usersCollection = client.db('SportsCampDb').collection('users')
+    const classesCollection = client.db('SportsCampDb').collection('classes')
   
 
 
@@ -77,7 +78,7 @@ app.patch("/instructor/:id",async(req,res)=>{
   res.send(result)
 })
 
-// get admin
+// get admin role
 
 
 app.get('/admin/:email',async (req, res) => {
@@ -88,7 +89,7 @@ app.get('/admin/:email',async (req, res) => {
   res.send(result);
 })
 
-// get instractor
+// get  instractor role
 
 app.get('/users/instractor/:email',async(req,res)=>{
   const email =req.params.email;
@@ -98,7 +99,21 @@ app.get('/users/instractor/:email',async(req,res)=>{
   res.send(result);
 })
 
+// get all instractor
+app.get('/instructors',async(req,res)=>{
+  const query = {role:'instructor'}
+  const result = await usersCollection.find(query).toArray()
+  res.send(result)
 
+})
+
+// Add class in db
+app.post('/class',  async (req, res) => {
+  const newClass = req.body;
+ 
+  const result = await classesCollection.insertOne(newClass)
+  res.send(result);
+})
 
     // Send a ping to confirm a successful connection
     await client.db('admin').command({ ping: 1 })
