@@ -114,6 +114,16 @@ app.post('/class',  async (req, res) => {
   const result = await classesCollection.insertOne(newClass)
   res.send(result);
 })
+// get class for each instructor
+app.get('/clases/:email',async(req,res)=>{
+  const email = req.params.email;
+  const query = {instructorEmail:email}
+  const result = await classesCollection.find(query).toArray();
+  res.send(result);
+
+})
+
+
 
     // Send a ping to confirm a successful connection
     await client.db('admin').command({ ping: 1 })
