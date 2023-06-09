@@ -114,6 +114,13 @@ app.post('/class',  async (req, res) => {
   const result = await classesCollection.insertOne(newClass)
   res.send(result);
 })
+// get all classes
+
+app.get("/allClasses", async (req, res) => {
+  const result = await classesCollection.find().toArray();
+  res.send(result);
+});
+
 // get class for each instructor
 app.get('/clases/:email',async(req,res)=>{
   const email = req.params.email;
