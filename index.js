@@ -171,6 +171,27 @@ app.get('/allApprovedClasses',async(req,res)=>{
 
 
 
+app.post('/selectedClass', async (req, res) => {
+  const id = req.body.id;
+  // console.log(req.body);
+  const selectBy = req.body.selectBy;
+  // console.log(selectBy);
+
+  const filter = { _id: new ObjectId(id) };
+  const selectededClass = await classesCollection.findOne(filter);
+  const newSelectededClass = {...selectededClass, status: "pending", selectBy}
+  delete newSelectededClass._id;
+  const result = await selectedClassCollection.insertOne(newSelectededClass)
+  res.send(result);
+})
+app.get('/mySelectedClass/:email',async(req,res)=>{
+  const email = req.params.email;
+  console.log(email);
+  const query = { selectBy: email, status: "pending" };
+  const result = await selectedClassCollection.find(query).toArray();
+  console.log(result);
+  res.send(result);
+})
 
 
 
