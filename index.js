@@ -2,6 +2,7 @@ const express = require('express')
 const app = express()
 const cors = require('cors')
 require('dotenv').config()
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb')
 const port = process.env.PORT || 5000
 
 // middleware
@@ -13,8 +14,13 @@ const corsOptions = {
 app.use(cors(corsOptions))
 app.use(express.json())
 
-const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb')
+
+app.get('/', (req, res) => {
+  res.send('Sports training camp Server is running')
+})
+
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.njyz70v.mongodb.net/?retryWrites=true&w=majority`;
+
 
 const client = new MongoClient(uri, {
   serverApi: {
@@ -22,7 +28,7 @@ const client = new MongoClient(uri, {
     strict: true,
     deprecationErrors: true,
   },
-})
+});
 
 async function run() {
   try {
@@ -104,7 +110,7 @@ app.get('/clases/:email',async(req,res)=>{
 })
 
 // update class
-app.patch('/updateClass',async(req,res)=>{
+app.patch('/updateClass/:id',async(req,res)=>{
   const id = req.params.id;
   const updateClass=req.body;
   console.log(updateClass);
@@ -120,7 +126,7 @@ app.patch('/updateClass',async(req,res)=>{
     },
   };
   const result = await classesCollection.updateOne(filter,updateDoc,option);
-  console.log(result);
+  // console.log(result);
   res.send(result);
 })
 
@@ -252,9 +258,6 @@ app.delete("/selectClass/:id", async (req, res) => {
 }
 run().catch(console.dir)
 
-app.get('/', (req, res) => {
-  res.send('Sports training camp Server is running')
-})
 
 app.listen(port, () => {
   console.log(`Sports training camp is running on port ${port}`)
