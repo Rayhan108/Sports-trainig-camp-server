@@ -28,6 +28,7 @@ async function run() {
   try {
     const usersCollection = client.db('SportsCampDb').collection('users')
     const classesCollection = client.db('SportsCampDb').collection('classes')
+    const selectedClassCollection = client.db('SportsCampDb').collection('selectedClasses')
   
 
 
@@ -88,6 +89,34 @@ app.get('/admin/:email',async (req, res) => {
   const result = { admin: user?.role === 'admin' }
   res.send(result);
 })
+// approve class
+app.patch('/approvedClass/:id', async (req, res) => {
+  const id = req.params.id;
+  const filter = { _id: new ObjectId(id) };
+  const updateDoc = {
+    $set: {
+      status: 'approved'
+    },
+  };
+  const result = await classesCollection.updateOne(filter, updateDoc);
+  res.send(result);
+
+})
+// denied classs
+
+app.patch('/deniedClass/:id', async (req, res) => {
+  const id = req.params.id;
+  const filter = { _id: new ObjectId(id) };
+  const updateDoc = {
+    $set: {
+      status: 'denied'
+    },
+  };
+  const result = await classesCollection.updateOne(filter, updateDoc);
+  res.send(result);
+
+})
+
 
 // get  instractor role
 
@@ -129,6 +158,19 @@ app.get('/clases/:email',async(req,res)=>{
   res.send(result);
 
 })
+
+
+// students api's
+
+// get approve classes
+app.get('/allApprovedClasses',async(req,res)=>{
+  const query = {status:'approved'}
+  const result = await classesCollection.find(query).toArray()
+  res.send(result)
+})
+
+
+
 
 
 
