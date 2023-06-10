@@ -52,21 +52,12 @@ app.post("/users", async (req, res) => {
       });
   
 
-// make admin
-app.patch("/admin/:id", async (req, res) => {
-  const id = req.params.id;
-  const filter = { _id: new ObjectId(id) };
-  const updateDoc = {
-    $set: {
-      role: "admin",
-    },
-  };
-  const result = await usersCollection.updateOne(filter, updateDoc);
-  res.send(result);
-});
+
+// instructor api
+
+
 
 // make instructor
-
 app.patch("/instructor/:id",async(req,res)=>{
   const id = req.params.id;
   const filter={_id: new ObjectId(id)};
@@ -79,47 +70,7 @@ app.patch("/instructor/:id",async(req,res)=>{
   res.send(result)
 })
 
-// get admin role
-
-
-app.get('/admin/:email',async (req, res) => {
-  const email = req.params.email;
-  const query = { email: email }
-  const user = await usersCollection.findOne(query);
-  const result = { admin: user?.role === 'admin' }
-  res.send(result);
-})
-// approve class
-app.patch('/approvedClass/:id', async (req, res) => {
-  const id = req.params.id;
-  const filter = { _id: new ObjectId(id) };
-  const updateDoc = {
-    $set: {
-      status: 'approved'
-    },
-  };
-  const result = await classesCollection.updateOne(filter, updateDoc);
-  res.send(result);
-
-})
-// denied classs
-
-app.patch('/deniedClass/:id', async (req, res) => {
-  const id = req.params.id;
-  const filter = { _id: new ObjectId(id) };
-  const updateDoc = {
-    $set: {
-      status: 'denied'
-    },
-  };
-  const result = await classesCollection.updateOne(filter, updateDoc);
-  res.send(result);
-
-})
-
-
 // get  instractor role
-
 app.get('/users/instractor/:email',async(req,res)=>{
   const email =req.params.email;
   const query={email:email}
@@ -143,12 +94,6 @@ app.post('/class',  async (req, res) => {
   const result = await classesCollection.insertOne(newClass)
   res.send(result);
 })
-// get all classes
-
-app.get("/allClasses", async (req, res) => {
-  const result = await classesCollection.find().toArray();
-  res.send(result);
-});
 
 // get class for each instructor
 app.get('/clases/:email',async(req,res)=>{
@@ -156,8 +101,101 @@ app.get('/clases/:email',async(req,res)=>{
   const query = {instructorEmail:email}
   const result = await classesCollection.find(query).toArray();
   res.send(result);
+})
+
+// update class
+app.patch('/updateClass',async(req,res)=>{
+  const id = req.params.id;
+  const updateClass=req.body;
+  console.log(updateClass);
+ 
+  const filter = { _id: new ObjectId(id) };
+  const option = { upsert: true };
+  
+  const updateDoc = {
+    $set: {
+      
+      price: updateClass.price,
+      seats: updateClass.seats,
+    },
+  };
+  const result = await classesCollection.updateOne(filter,updateDoc,option);
+  console.log(result);
+  res.send(result);
+})
+
+// get single class using params
+app.get("/class/:id", async (req, res) => {
+  const id = req.params.id;
+  const query = { _id: new ObjectId(id) };
+  const result = await classesCollection.findOne(query);
+  // console.log(result);
+  res.send(result);
+});
+
+
+// admin api's
+
+// make admin
+app.patch("/admin/:id", async (req, res) => {
+  const id = req.params.id;
+  const filter = { _id: new ObjectId(id) };
+  const updateDoc = {
+    $set: {
+      role: "admin",
+    },
+  };
+  const result = await usersCollection.updateOne(filter, updateDoc);
+  res.send(result);
+});
+
+// get admin role
+app.get('/admin/:email',async (req, res) => {
+  const email = req.params.email;
+  const query = { email: email }
+  const user = await usersCollection.findOne(query);
+  const result = { admin: user?.role === 'admin' }
+  res.send(result);
+})
+
+// approve class
+app.patch('/approvedClass/:id', async (req, res) => {
+  const id = req.params.id;
+  const filter = { _id: new ObjectId(id) };
+  const updateDoc = {
+    $set: {
+      status: 'approved'
+    },
+  };
+  const result = await classesCollection.updateOne(filter, updateDoc);
+  res.send(result);
 
 })
+
+// denied classs
+app.patch('/deniedClass/:id', async (req, res) => {
+  const id = req.params.id;
+  const filter = { _id: new ObjectId(id) };
+  const updateDoc = {
+    $set: {
+      status: 'denied'
+    },
+  };
+  const result = await classesCollection.updateOne(filter, updateDoc);
+  res.send(result);
+
+})
+
+
+
+// get all classes
+
+app.get("/allClasses", async (req, res) => {
+  const result = await classesCollection.find().toArray();
+  res.send(result);
+});
+
+
 
 
 // students api's
