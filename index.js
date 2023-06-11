@@ -3,6 +3,8 @@ const app = express()
 const cors = require('cors')
 require('dotenv').config()
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb')
+const { default: Stripe } = require('stripe')
+const stripe = require('stripe')(process.env.PAYMENT_SECRET_KEY)
 const port = process.env.PORT || 5000
 
 // middleware
@@ -35,6 +37,7 @@ async function run() {
     const usersCollection = client.db('SportsCampDb').collection('users')
     const classesCollection = client.db('SportsCampDb').collection('classes')
     const selectedClassCollection = client.db('SportsCampDb').collection('selectedClasses')
+    const enrolledCollection = client.db('SportsCampDb').collection('enrolledClasses')
   
 
 
@@ -279,8 +282,8 @@ app.get('/pay/:id',async(req,res)=>{
 
    // create payment intent
    app.post('/create-payment-intent', async (req, res) => {
-    const { price } = req.body;
-    const amount = parseInt(price * 100);
+    const { classPrice } = req.body;
+    const amount = parseInt(classPrice * 100);
     const paymentIntent = await stripe.paymentIntents.create({
       amount: amount,
       currency: 'usd',
@@ -293,16 +296,15 @@ app.get('/pay/:id',async(req,res)=>{
   })
 
   
-    // payment related api
     app.post('/payments', async (req, res) => {
       const payment = req.body;
-      console.log(payment);
-      // const insertResult = await paymentCollection.insertOne(payment);
+      // console.log(payment);
+      const id = payment.classId;
+      const insertResult = await enrolledCollection.insertOne(payment);
+const query = {_id:new ObjectId(id)}
+      const deleteResult = await selectedClassCollection.deleteOne(query)
 
-      // const query = { _id: { $in: payment.cartItems.map(id => new ObjectId(id)) } }
-      // const deleteResult = await selectedClassCollection.deleteOne(query)
-
-      // res.send({ insertResult, deleteResult });
+      res.send({ insertResult, deleteResult });
     })
 
 
