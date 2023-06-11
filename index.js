@@ -269,15 +269,31 @@ app.delete("/selectClass/:id", async (req, res) => {
 });
 
 // get selected class
-app.get('/pay/:id',async(req,res)=>{
+app.get('/selectedClass/:id',async(req,res)=>{
   const id =req.params.id;
   const query = {_id:new ObjectId(id)}
   const result = await selectedClassCollection.find(query).toArray();
   // console.log(result);
   res.send(result)
 })
-
-
+// get students enrolled class
+app.get('/paidClass/:email',async(req,res)=>{
+  const email = req.params.email;
+  const query = { studentEmail: email};
+  const result = await enrolledCollection.find(query).toArray();
+  result.sort((a, b) => b.paymentDate - a.paymentDate);
+  const recentPaidClass = result.pop();
+  // console.log(result);
+  res.send([recentPaidClass, ...result]);
+})
+// get each instructors  enrolled students 
+app.get('/enrolledStudents/:email',async(req,res)=>{
+  const email = req.params.email;
+  const query = { studentEmail: email};
+  const result = await enrolledCollection.find(query).toArray();
+  // console.log(result);
+  res.send(result);
+})
 // payment -----------
 
    // create payment intent
