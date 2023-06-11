@@ -113,7 +113,7 @@ app.get('/clases/:email',async(req,res)=>{
 app.patch('/updateClass/:id',async(req,res)=>{
   const id = req.params.id;
   const updateClass=req.body;
-  console.log(updateClass);
+  // console.log(updateClass);
  
   const filter = { _id: new ObjectId(id) };
   const option = { upsert: true };
@@ -201,7 +201,26 @@ app.get("/allClasses", async (req, res) => {
   res.send(result);
 });
 
-
+// send feedback
+app.patch('/feedback/:id',async(req,res)=>{
+  const id = req.params.id;
+  const updateClass=req.body;
+  // console.log(updateClass);
+ 
+  const filter = { _id: new ObjectId(id) };
+  const option = { upsert: true };
+  
+  const updateDoc = {
+    $set: {
+      
+      
+      feedback: updateClass.feedback,
+    },
+  };
+  const result = await classesCollection.updateOne(filter,updateDoc,option);
+  // console.log(result);
+  res.send(result);
+})
 
 
 // students api's
