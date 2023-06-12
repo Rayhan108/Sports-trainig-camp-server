@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 const cors = require("cors");
 require("dotenv").config();
+var jwt = require('jsonwebtoken');
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const { default: Stripe } = require("stripe");
 const stripe = require("stripe")(process.env.PAYMENT_SECRET_KEY);
@@ -15,6 +16,29 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 app.use(express.json());
+
+// jwt verify middleware
+
+const verifyAccess = (req, res, next) => {
+  const authorization = req.headers.authorization;
+  if (!authorization) {
+    return res.status(401).send({ error: true, message: 'You are not valid user,unauthorized access ' });
+  }
+
+  const token = authorization.split(' ')[1];
+
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+    if (err) {
+      return res.status(401).send({ error: true, message: 'You are not valid user,unauthorized access' })
+    }
+    req.decoded = decoded;
+    next();
+  })
+}
+
+
+
+
 
 app.get("/", (req, res) => {
   res.send("Sports training camp Server is running");
@@ -33,10 +57,19 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     const usersCollection = client.db("SportsCampDb").collection("users");
+    const enrolledCollection = client.db("SportsCampDb").collection("enrolledClass");
     const classesCollection = client.db("SportsCampDb").collection("classes");
     const selectedClassCollection = client
       .db("SportsCampDb")
       .collection("selectedClasses");
+
+app.post('/jwt',(req,res)=>{
+  const user = req.body;
+  const token =jwt.sign(user,process.env.ACCESS_SECRET_TOKEN,{expiresIn:'1h'})
+  res.send({token});
+
+})
+
 
     // save all user email on db
     app.post("/users", async (req, res) => {
@@ -242,6 +275,12 @@ async function run() {
     });
     app.get("/mySelectedClass/:email", async (req, res) => {
       const email = req.params.email;
+      
+
+      // const decodedEmail = req.decoded.email;
+      // if (email !== decodedEmail) {
+      //   return res.status(403).send({ error: true, message: 'forbidden access' })
+      // }
       const query = { selectBy: email, status: "pending" };
       const result = await selectedClassCollection.find(query).toArray();
       res.send(result);
@@ -308,6 +347,18 @@ async function run() {
       const deleteResult = await selectedClassCollection.deleteOne(query);
       res.send({ insertResult, deleteResult });
     });
+// most enrolled students
+
+app.get('/mostEnrolled',async(req,res)=>{
+  const query = { enrolledStudents: { $gt: 10 } }
+  const result = await classesCollection.find(query).toArray();
+  res.send(result);
+})
+
+
+
+
+
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
