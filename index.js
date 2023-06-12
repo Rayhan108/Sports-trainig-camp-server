@@ -276,14 +276,6 @@ async function run() {
       const recentPaidClass = result.pop();
       res.send([recentPaidClass, ...result]);
     });
-    // get each instructors  enrolled students
-    app.get("/enrolledStudents/:email", async (req, res) => {
-      const email = req.params.email;
-      const query = { instructorEmail: email };
-      const result = await enrolledCollection.find(query).toArray();
-
-      res.send(result);
-    });
     // payment -----------
 
     // create payment intent
@@ -305,9 +297,9 @@ async function run() {
       const payment = req.body;
       const id = payment.classId;
       const newClassId = payment.newClassId;
-      // update seat
+      // update seat & enrolled students
       const updateDoc = {
-        $inc: { seats: -1 },
+        $inc: { seats: -1, enrolledStudents: 1 },
       };
       await classesCollection.findOneAndUpdate(
         { _id: new ObjectId(newClassId) },
