@@ -37,9 +37,6 @@ async function run() {
     const selectedClassCollection = client
       .db("SportsCampDb")
       .collection("selectedClasses");
-    const enrolledCollection = client
-      .db("SportsCampDb")
-      .collection("enrolledClasses");
 
     // save all user email on db
     app.post("/users", async (req, res) => {
